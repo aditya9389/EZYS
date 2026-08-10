@@ -1,6 +1,6 @@
 const axios = require("../config/axios");
 
-function mapArticle(article) {
+function mapArticle(article, company) {
     return {
         title: article.title,
         description: article.description,
@@ -8,7 +8,8 @@ function mapArticle(article) {
         source: article.source?.name ?? "Unknown",
         url: article.url,
         imageUrl: article.urlToImage,
-        publishedAt: article.publishedAt
+        publishedAt: article.publishedAt,
+        company
     };
 }
 
@@ -27,7 +28,9 @@ exports.fetchCompanyNews = async (company) => {
         }
     );
 
-    const articles = response.data.articles.map(mapArticle);
+    const articles = response.data.articles.map(
+        article => mapArticle(article, company)
+    );
 
     return {
         company,
