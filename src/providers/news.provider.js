@@ -13,7 +13,7 @@ function mapArticle(article, company) {
     };
 }
 
-exports.fetchCompanyNews = async (company) => {
+exports.fetchCompanyNews = async (company, page = 1) => {
 
     const response = await axios.get(
         "https://newsapi.org/v2/everything",
@@ -23,7 +23,8 @@ exports.fetchCompanyNews = async (company) => {
                 apiKey: process.env.NEWS_API_KEY,
                 language: "en",
                 sortBy: "publishedAt",
-                pageSize: 5
+                pageSize: 5,
+                page
             }
         }
     );

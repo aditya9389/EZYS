@@ -1,30 +1,21 @@
 const newsService = require("../services/news.service");
+const { validateCompany } = require("../validators/news.validator");
 
-exports.getNews = async (req, res) => {
-    try {
-        const company = req.query.company;
+exports.getNews = async (req, res, next) => {
+    const company = req.query.company;
 
-        if (!company || company.trim() === "") {
-            return res.status(400).json({
-                error: "Company parameter is required."
-            });
-        }
+    const validationError = validateCompany(company);
 
-        if (/^\d+$/.test(company)) {
-            return res.status(400).json({
-                error: "Company name cannot contain only numbers."
-            });
-        }
-
-        const news = await newsService.fetchNews(company);
-
-        res.json(news);
-
-    } catch (error) {
-        console.error(error);
-
-        res.status(500).json({
-            error: "Something went wrong."
+    if (validationError) {
+        return res.status(400).json({
+            error: validationError
         });
+    }
+
+    try {
+        const news = await newsService.fetchNews(company);
+        res.json(news);
+    } catch (error) {
+        next(error);
     }
 };

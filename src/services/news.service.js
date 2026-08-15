@@ -1,5 +1,8 @@
 const newsProvider = require("../providers/news.provider");
 
+const TARGET_ARTICLES = 5;
+const MAX_PAGES = 3;
+
 function getCompanyAliases(company) {
     const normalizedCompany = company.trim();
 
@@ -31,15 +34,41 @@ function isRelevantArticle(article, aliases) {
 exports.fetchNews = async (company) => {
     const aliases = getCompanyAliases(company);
 
-    const news = await newsProvider.fetchCompanyNews(company);
+    const relevantArticles = [];
+    const existingUrls = new Set();
 
-    const relevantArticles = news.articles.filter(article =>
-        isRelevantArticle(article, aliases)
-    );
+    for (let page = 1; page <= MAX_PAGES; page++) {
+
+        const news = await newsProvider.fetchCompanyNews(
+            company,
+            page
+        );
+
+        const filteredArticles = news.articles.filter(article =>
+            isRelevantArticle(article, aliases)
+        );
+
+        for (const article of filteredArticles) {
+            if (!existingUrls.has(article.url)) {
+                existingUrls.add(article.url);
+                relevantArticles.push(article);
+            }
+        }
+
+        if (relevantArticles.length >= TARGET_ARTICLES) {
+            break;
+        }
+
+        if (news.articles.length === 0) {
+            break;
+        }
+    }
+
+    const articles = relevantArticles.slice(0, TARGET_ARTICLES);
 
     return {
-        company: news.company,
-        totalArticles: relevantArticles.length,
-        articles: relevantArticles
+        company,
+        totalArticles: articles.length,
+        articles
     };
 };
