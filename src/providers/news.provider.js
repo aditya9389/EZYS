@@ -1,4 +1,5 @@
 const axios = require("../config/axios");
+const { newsApiKey } = require("../config/env");
 
 function mapArticle(article, company) {
     return {
@@ -20,7 +21,7 @@ exports.fetchCompanyNews = async (company, page = 1) => {
         {
             params: {
                 q: company,
-                apiKey: process.env.NEWS_API_KEY,
+                apiKey: newsApiKey,
                 language: "en",
                 sortBy: "publishedAt",
                 pageSize: 5,
